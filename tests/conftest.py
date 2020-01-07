@@ -31,3 +31,18 @@ def db_session(request):
     request.addfinalizer(stop_db)
 
     return session
+
+
+@pytest.fixture(scope="function", autouse=True)
+def cleanup(request, db_session):
+    """
+    Trunc all tables at the end of each test
+    """
+    for table in reversed(Base.metadata.sorted_tables):
+        db_session.execute(table.delete())
+
+    def function_ends():
+        db_session.commit()
+        db_session.close()
+
+    request.addfinalizer(function_ends)
