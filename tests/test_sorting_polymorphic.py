@@ -1,11 +1,12 @@
 import pytest
 
+from sqlalchemy.orm import aliased
 from sqlalchemy_utils import sort_query
 from sqlalchemy_basics.sorting.models_polymorphic import (
-    SourceCountry, 
-    Company, 
-    ConferencePerson, 
-    Atendee, 
+    SourceCountry,
+    Company,
+    ConferencePerson,
+    Atendee,
     Speaker
 )
 
@@ -50,36 +51,42 @@ parameters = [
 
 @pytest.mark.parametrize('next', parameters)
 def test_sorting_by_country(db_session, next):
-    # given:
+    # given: a bunch of people
     _create_people(db_session)
 
-    # when:
+    # the name of the property we want to sort by must
+    # match the name of the name of the joined table
+    # here we've created an alias because the table is
+    # named 'companies' and the sort_by property is `company`
+    joined_company = aliased(Company, name='company')
+
     query = db_session.\
         query(ConferencePerson).\
         join(SourceCountry).\
-        join(Company)
+        join(joined_company)
 
-    # then:
+    # when: sorting by the current criteria
     result = sort_query(query, next[0]).all()
 
-    # then:
+    # then: we should get the expected result
     assert result[0].name == next[1]
 
 
 def test_filtering_by_company_and_sorting_by_country(db_session):
-    # given:
+    # given: a bunch of people
     _create_people(db_session)
 
-    # when:
+    # because we're not sorting by company there's no
+    # need to create an alias, but it would be
+    # advisable to do so just in case
     query = db_session.\
         query(ConferencePerson).\
         join(SourceCountry).\
         join(Company).\
         filter(Company.name == 'google')
 
-    # then:
+    # when: sorting the query by country's name
     result = sort_query(query, 'source_country-name').all()
 
-    print([p.name for p in result])
-    # then:
+    # then: we should get the expected person
     assert result[0].name == 'Peter'

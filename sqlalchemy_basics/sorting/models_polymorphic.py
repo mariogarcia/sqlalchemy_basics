@@ -23,7 +23,7 @@ class Company(IDBase):
     name = Column(String(100), unique=True)
 
     # meta
-    __tablename__ = 'company'
+    __tablename__ = 'companies'
 
 
 class SourceCountry(IDBase):
@@ -40,10 +40,10 @@ class ConferencePerson(IDBase):
     type = Column(String(100))
 
     # relationships
-    source_country_id = Column(UUID(as_uuid=True), ForeignKey("source_country.id"))
+    source_country_id = Column(UUID(as_uuid=True), ForeignKey(SourceCountry.id))
     source_country = relationship(SourceCountry, lazy='selectin')
 
-    company_id = Column(UUID(as_uuid=True), ForeignKey("company.id"))
+    company_id = Column(UUID(as_uuid=True), ForeignKey(Company.id))
     company = relationship(Company, lazy='selectin')
 
     # meta
