@@ -37,7 +37,7 @@ class SourceCountry(IDBase):
 class ConferencePerson(IDBase):
     # fields
     name = Column(String(100), unique=True)
-    type = Column(String(100), unique=True)
+    type = Column(String(100))
 
     # relationships
     source_country_id = Column(UUID(as_uuid=True), ForeignKey("source_country.id"))
